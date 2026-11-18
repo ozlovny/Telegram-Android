@@ -1,0 +1,35 @@
+name: Build Telegram Client
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:  # ручной запуск
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive   # критично для Telegram-проектов!
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Build APK
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: telegram-apk
+          path: '**/build/outputs/apk/**/*.apk'
